@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三木水｜決策整理練習</title>
+
+  <!-- 引入 Google Fonts：Noto Serif TC（標題與重點）與 Noto Sans TC（內文與表單） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- 引入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 自訂三木水「木（深森綠）＋ 水（沉靜湖藍）」色彩與字體配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mist: '#F2F7F6',         // 極淺霧藍綠紙感底色
+            card: '#FFFFFF',         // 純白卡片底色
+            borderline: '#D4E2DF',   // 柔和藍綠邊框線
+            wood: {
+              DEFAULT: '#245243',    // 主色（木｜森林深綠）
+              hover: '#1A3D32',      // 深綠懸停狀態
+              tint: '#E4EFEA',       // 淺鼠尾草綠底色
+            },
+            water: {
+              DEFAULT: '#285978',    // 副色（水｜沉靜湖藍）
+              hover: '#1E455E',      // 湖藍懸停狀態
+              tint: '#E6F0F6',       // 淺水藍底色
+            },
+            ink: {
+              DEFAULT: '#1E2D2B',    // 深墨灰主文字
+              muted: '#526663',      // 次要說明文字
+            },
+            linegreen: '#06C755'     // LINE 官方識別綠
+          },
+          fontFamily: {
+            serif: ['"Noto Serif TC"', 'serif'],
+            sans: ['"Noto Sans TC"', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 10px 30px -10px rgba(36, 82, 67, 0.08), 0 2px 8px -2px rgba(40, 89, 120, 0.05)',
+            'soft': '0 4px 14px -2px rgba(30, 45, 43, 0.05)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* 基礎閱讀設定：寬鬆行距 1.75，讓思緒放慢 */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: #F2F7F6;
+      color: #1E2D2B;
+      font-family: 'Noto Sans TC', sans-serif;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* 細緻紙紋質感疊加 */
+    .paper-grain {
+      background-image: radial-gradient(#C7D8D4 0.65px, transparent 0.65px);
+      background-size: 22px 22px;
+    }
+
+    /* 句中填空輸入框樣式 */
+    .inline-fill-input {
+      background-color: #F7FBFA;
+      border-bottom: 2px solid #B8CEC9;
+      transition: all 0.2s ease;
+    }
+    .inline-fill-input:focus {
+      outline: none;
+      background-color: #E4EFEA;
+      border-bottom-color: #245243;
+    }
+
+    /* 自訂捲軸，維持頁面清爽 */
+    textarea::-webkit-scrollbar {
+      width: 6px;
+    }
+    textarea::-webkit-scrollbar-track {
+      background: #F2F7F6;
+      border-radius: 9999px;
+    }
+    textarea::-webkit-scrollbar-thumb {
+      background: #C2D4D0;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="paper-grain min-h-screen relative flex flex-col justify-between selection:bg-wood-tint selection:text-wood">
+
+  <!-- 背景環境光暈：左上森林綠微光 ＋ 右下湖水藍微光 -->
+  <div class="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
+    <div class="absolute -top-28 -left-24 w-96 h-96 rounded-full bg-[#245243]/[0.07] blur-3xl"></div>
+    <div class="absolute top-1/3 -right-32 w-80 h-80 rounded-full bg-[#285978]/[0.06] blur-3xl"></div>
+    <div class="absolute -bottom-28 -right-20 w-[26rem] h-[26rem] rounded-full bg-[#285978]/[0.09] blur-3xl"></div>
+  </div>
+
+  <!-- 頂部品牌識別與官方 LINE 導覽列 -->
+  <header class="relative z-20 w-full max-w-[720px] mx-auto px-4 sm:px-6 pt-6 pb-3 flex items-center justify-between gap-3">
+    <!-- 左側：自訂品牌 Logo 上傳區 ＋ 工作室名稱 -->
+    <div class="flex items-center gap-3.5">
+      <!-- 隱藏的圖片檔案選擇器 -->
+      <input
+        type="file"
+        id="logo-file-input"
+        accept="image/*"
+        class="hidden"
+        aria-label="上傳三木水品牌 Logo 圖片"
+      />
+
+      <!-- 56x56px Logo 預留容器（點擊可上傳或更換本機圖片） -->
+      <button
+        type="button"
+        id="logo-upload-trigger"
+        title="點擊上傳或更換品牌 Logo"
+        class="group relative w-14 h-14 rounded-2xl bg-white/90 border-2 border-dashed border-wood/35 hover:border-wood flex items-center justify-center overflow-hidden shrink-0 shadow-soft transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-wood/40"
+      >
+        <!-- 未上傳時的簡約文字提示（無預設 SVG 圖示） -->
+        <span
+          id="logo-placeholder-text"
+          class="text-[11px] leading-tight font-medium text-ink-muted group-hover:text-wood text-center px-1 select-none"
+        >
+          點擊上傳<br />Logo
+        </span>
+
+        <!-- 正式上線時，可直接將下方 src 填入你的圖片路徑（例如 ./logo.png），網頁就會直接顯示你的品牌 Logo -->
+        <img
+          id="brand-logo-img"
+          src=""logo-02.png" alt="三木水 Logo" class="brand-logo" onerror="this.style.display='none'"
+          alt="三木水工作室 Logo"
+          class="hidden w-full h-full object-cover"
+        />
+
+        <!-- 已上傳圖片後，滑鼠移過時顯示的低調「更換」提示 -->
+        <span
+          id="logo-hover-overlay"
+          class="hidden absolute inset-0 bg-ink/55 text-white text-[11px] font-medium items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          更換
+        </span>
+      </button>
+
+      <!-- 品牌名稱與帳號 -->
+      <div>
+        <span class="block font-serif text-base sm:text-lg font-bold text-ink tracking-wide leading-snug">
+          三木水工作室
+        </span>
+        <span class="block text-xs text-ink-muted tracking-wider">
+          @three.tree.water
+        </span>
+      </div>
+    </div>
+
+    <!-- 右側：三木水官方 LINE 快捷按鈕 -->
+    <a
+      href="https://lin.ee/sqUy2Lx"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-wood-tint text-wood border border-borderline hover:border-wood/40 text-xs sm:text-sm font-medium shadow-soft transition-all shrink-0"
+    >
+      <span class="w-2 h-2 rounded-full bg-linegreen"></span>
+      <span>官方 LINE</span>
+    </a>
+  </header>
+
+  <!-- 頂部固定填寫進度條與步驟標籤 -->
+  <nav
+    aria-label="練習步驟進度"
+    class="sticky top-0 z-30 w-full bg-mist/90 backdrop-blur-md border-b border-borderline/80 transition-all"
+  >
+    <div class="max-w-[720px] mx-auto px-4 sm:px-6 py-2.5">
+      <!-- 進度條軌道 -->
+      <div class="w-full h-1.5 bg-borderline rounded-full overflow-hidden mb-2">
+        <div
+          id="progress-fill"
+          class="h-full bg-gradient-to-r from-wood to-water rounded-full transition-all duration-500 ease-out"
+          style="width: 0%;"
+        ></div>
+      </div>
+
+      <!-- 四步驟可點擊跳轉標籤 -->
+      <div class="grid grid-cols-4 gap-1 text-[11px] sm:text-xs">
+        <a
+          href="#sec-1"
+          data-step-nav="1"
+          class="step-nav-item text-center py-1 px-1 rounded-lg font-medium text-ink-muted hover:text-wood hover:bg-white/70 transition-colors truncate"
+        >
+          1. 理清問題
+        </a>
+        <a
+          href="#sec-2"
+          data-step-nav="2"
+          class="step-nav-item text-center py-1 px-1 rounded-lg font-medium text-ink-muted hover:text-wood hover:bg-white/70 transition-colors truncate"
+        >
+          2. 分開事實
+        </a>
+        <a
+          href="#sec-3"
+          data-step-nav="3"
+          class="step-nav-item text-center py-1 px-1 rounded-lg font-medium text-ink-muted hover:text-wood hover:bg-white/70 transition-colors truncate"
+        >
+          3. 找出卡點
+        </a>
+        <a
+          href="#sec-4"
+          data-step-nav="4"
+          class="step-nav-item text-center py-1 px-1 rounded-lg font-medium text-ink-muted hover:text-water hover:bg-white/70 transition-colors truncate"
+        >
+          4. 最小嘗試
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 輕量浮動狀態提示（取代 alert） -->
+  <div
+    id="toast-box"
+    role="status"
+    aria-live="polite"
+    class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 w-[92%] max-w-sm"
+  >
+    <div class="bg-ink text-white px-4 py-3 rounded-2xl shadow-lg text-xs sm:text-sm text-center font-medium border border-white/10">
+      <span id="toast-text">已更新內容</span>
+    </div>
+  </div>
+
+  <!-- 主內容單欄卡片流（最大寬度 720px） -->
+  <main class="relative z-10 flex-1 w-full max-w-[720px] mx-auto px-4 sm:px-6 py-6 sm:py-9 space-y-6 sm:space-y-8">
+
+    <!-- ========================================== -->
+    <!-- 開場標題與快速操作列                        -->
+    <!-- ========================================== -->
+    <section class="bg-card border border-borderline rounded-3xl shadow-card p-6 sm:p-9">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-wood-tint text-wood text-xs font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-wood"></span>
+          <span>三到五分鐘自我整理</span>
+        </span>
+
+        <!-- 輕量功能按鈕：先看填寫範例 / 清空重填 -->
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="fill-demo-btn"
+            class="px-3 py-1.5 rounded-xl bg-water-tint hover:bg-water text-water hover:text-white text-xs font-medium transition-colors cursor-pointer"
+          >
+            先看填寫範例
+          </button>
+          <button
+            type="button"
+            id="clear-all-btn"
+            class="px-3 py-1.5 rounded-xl bg-mist hover:bg-borderline/70 text-ink-muted hover:text-ink text-xs font-medium transition-colors cursor-pointer"
+          >
+            清空重填
+          </button>
+        </div>
+      </div>
+
+      <h1 class="font-serif text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-3">
+        三木水｜決策整理練習
+      </h1>
+      <p class="text-ink-muted text-sm sm:text-base leading-[1.75]">
+        腦袋轉不停的時候，光靠想很難想出答案。花三到五分鐘，把卡住的事情寫下來，讓輪廓先出來。
+      </p>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 區塊一：1. 先把事情講清楚                   -->
+    <!-- ========================================== -->
+    <section id="sec-1" class="scroll-mt-20 bg-card border border-borderline rounded-3xl shadow-card p-6 sm:p-9">
+      <div class="mb-5">
+        <h2 class="font-serif text-lg sm:text-xl font-bold text-wood mb-1.5">
+          1. 先把事情講清楚
+        </h2>
+        <p class="text-ink-muted text-sm sm:text-base">
+          現在讓你反覆想、遲遲定不下來的，主要是哪兩個選擇？
+        </p>
+      </div>
+
+      <!-- 句型填空框 -->
+      <div class="bg-mist/75 border border-borderline rounded-2xl p-5 sm:p-6 space-y-5 text-sm sm:text-base text-ink leading-[1.9]">
+        <div>
+          <span>我在猶豫要「</span>
+          <input
+            type="text"
+            id="input-choice-a"
+            placeholder="例如：留在原職"
+            class="inline-fill-input w-full sm:w-auto sm:min-w-[190px] px-3 py-1 my-1 rounded-lg text-wood font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
+          />
+          <span>」還是「</span>
+          <input
+            type="text"
+            id="input-choice-b"
+            placeholder="例如：轉職接案"
+            class="inline-fill-input w-full sm:w-auto sm:min-w-[190px] px-3 py-1 my-1 rounded-lg text-wood font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
+          />
+          <span>」</span>
+        </div>
+
+        <div class="pt-3 border-t border-borderline/70">
+          <span>這件事大概卡了「</span>
+          <input
+            type="text"
+            id="input-stuck-time"
+            placeholder="例如：兩天、兩個月、兩年"
+            class="inline-fill-input w-full sm:w-auto sm:min-w-[150px] px-3 py-1 my-1 rounded-lg text-wood font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
+          />
+          <span>」</span>
+        </div>
+
+        <div class="pt-3 border-t border-borderline/70">
+          <span>如果繼續拖著不決定，最直接的影響是「</span>
+          <input
+            type="text"
+            id="input-delay-impact"
+            placeholder="例如：每天睡不好、工作也沒辦法專心"
+            class="inline-fill-input w-full sm:w-auto sm:min-w-[270px] px-3 py-1 my-1 rounded-lg text-water font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
+          />
+          <span>」</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 區塊二：2. 把事實跟擔心分開                 -->
+    <!-- ========================================== -->
+    <section id="sec-2" class="scroll-mt-20 bg-card border border-borderline rounded-3xl shadow-card p-6 sm:p-9">
+      <div class="mb-5">
+        <h2 class="font-serif text-lg sm:text-xl font-bold text-wood mb-1.5">
+          2. 把事實跟擔心分開
+        </h2>
+        <p class="text-ink-muted text-sm sm:text-base">
+          人會內耗，常常是因為把「還沒發生的擔心」當成「已經確定的事」。試著把這兩邊分開寫。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <!-- 左欄：已經確定的事實（深綠主題） -->
+        <div class="bg-wood-tint/55 border border-wood/20 rounded-2xl p-4 sm:p-5 flex flex-col">
+          <h3 class="font-serif text-base font-bold text-wood mb-1.5">
+            已經確定的事實
+          </h3>
+          <label for="input-facts" class="text-xs sm:text-sm text-ink-muted leading-relaxed mb-3">
+            拿掉猜測，目前百分之百確定、有根據的狀況有哪些？
+          </label>
+          <textarea
+            id="input-facts"
+            rows="5"
+            placeholder="例如：存款還有 15 萬、對方三天沒回訊息、合約下週五到期"
+            class="w-full flex-1 bg-white border border-borderline focus:border-wood focus:outline-none rounded-xl p-3.5 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/55 resize-none transition-colors"
+          ></textarea>
+        </div>
+
+        <!-- 右欄：腦袋自己補上的擔心（湖藍主題） -->
+        <div class="bg-water-tint/60 border border-water/20 rounded-2xl p-4 sm:p-5 flex flex-col">
+          <h3 class="font-serif text-base font-bold text-water mb-1.5">
+            腦袋自己補上的擔心
+          </h3>
+          <label for="input-worries" class="text-xs sm:text-sm text-ink-muted leading-relaxed mb-3">
+            你現在最怕發生的畫面是什麼？
+          </label>
+          <textarea
+            id="input-worries"
+            rows="5"
+            placeholder="例如：怕離職後找不到下一份、怕主動問了會連朋友都做不成"
+            class="w-full flex-1 bg-white border border-borderline focus:border-water focus:outline-none rounded-xl p-3.5 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/55 resize-none transition-colors"
+          ></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 區塊三：3. 看看自己卡在哪一關               -->
+    <!-- ========================================== -->
+    <section id="sec-3" class="scroll-mt-20 bg-card border border-borderline rounded-3xl shadow-card p-6 sm:p-9">
+      <div class="mb-5">
+        <h2 class="font-serif text-lg sm:text-xl font-bold text-wood mb-1.5">
+          3. 看看自己卡在哪一關
+        </h2>
+        <p class="text-ink-muted text-sm sm:text-base">
+          下面這幾種狀態，哪一個最像你現在的心情？（可以複選）
+        </p>
+      </div>
+
+      <!-- 四張可複選的互動卡片 -->
+      <div id="stuck-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- 由 JS 渲染並同步狀態 -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 區塊四：4. 明天睡前能做的小試探             -->
+    <!-- ========================================== -->
+    <section id="sec-4" class="scroll-mt-20 bg-card border border-borderline rounded-3xl shadow-card p-6 sm:p-9">
+      <div class="mb-5">
+        <h2 class="font-serif text-lg sm:text-xl font-bold text-water mb-1.5">
+          4. 明天睡前能做的小試探
+        </h2>
+        <p class="text-ink-muted text-sm sm:text-base">
+          還不用現在就做最後決定。在不用承擔太大後果的前提下，明天睡前你可以先試探哪一件小事？
+        </p>
+      </div>
+
+      <!-- 靈感標籤快捷按鈕 -->
+      <div class="mb-4">
+        <p class="text-xs text-ink-muted mb-2.5">點一下可以直接帶入下方空格：</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="idea-chip px-3.5 py-2 rounded-xl bg-mist hover:bg-water-tint text-ink hover:text-water border border-borderline hover:border-water/40 text-xs sm:text-sm transition-colors cursor-pointer"
+            data-idea="先打通電話問清楚細節"
+          >
+            + 先打通電話問清楚細節
+          </button>
+          <button
+            type="button"
+            class="idea-chip px-3.5 py-2 rounded-xl bg-mist hover:bg-water-tint text-ink hover:text-water border border-borderline hover:border-water/40 text-xs sm:text-sm transition-colors cursor-pointer"
+            data-idea="約有經驗的人聊半小時"
+          >
+            + 約有經驗的人聊半小時
+          </button>
+          <button
+            type="button"
+            class="idea-chip px-3.5 py-2 rounded-xl bg-mist hover:bg-water-tint text-ink hover:text-water border border-borderline hover:border-water/40 text-xs sm:text-sm transition-colors cursor-pointer"
+            data-idea="先寫一版草稿看看反應"
+          >
+            + 先寫一版草稿看看反應
+          </button>
+          <button
+            type="button"
+            class="idea-chip px-3.5 py-2 rounded-xl bg-mist hover:bg-water-tint text-ink hover:text-water border border-borderline hover:border-water/40 text-xs sm:text-sm transition-colors cursor-pointer"
+            data-idea="算一下最壞情況要花多少錢"
+          >
+            + 算一下最壞情況要花多少錢
+          </button>
+          <button
+            type="button"
+            class="idea-chip px-3.5 py-2 rounded-xl bg-mist hover:bg-water-tint text-ink hover:text-water border border-borderline hover:border-water/40 text-xs sm:text-sm transition-colors cursor-pointer"
+            data-idea="給自己設一個截止日期"
+          >
+            + 給自己設一個截止日期
+          </button>
+        </div>
+      </div>
+
+      <!-- 小試探輸入框 -->
+      <div>
+        <label for="input-small-step" class="sr-only">明天睡前能做的小試探</label>
+        <textarea
+          id="input-small-step"
+          rows="3"
+          placeholder="寫下一件你明天就能做、成本最低的小動作..."
+          class="w-full bg-mist/60 border border-borderline focus:bg-white focus:border-water focus:outline-none rounded-2xl p-4 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/55 resize-none transition-colors"
+        ></textarea>
+      </div>
+
+      <!-- 產出按鈕（點擊後平滑捲動至下方動態整理單） -->
+      <div class="mt-6">
+        <button
+          type="button"
+          id="generate-note-btn"
+          class="w-full py-4 px-6 rounded-2xl bg-wood hover:bg-wood-hover text-white font-medium text-base shadow-soft hover:shadow transition-all cursor-pointer"
+        >
+          整理出我的決策筆記
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 動態生成的「決策整理單」結果區               -->
+    <!-- ========================================== -->
+    <article
+      id="result-sheet"
+      class="scroll-mt-20 bg-card border-2 border-wood/25 rounded-3xl shadow-card overflow-hidden"
+    >
+      <!-- 整理單頂部標頭（同步顯示已上傳的品牌 Logo） -->
+      <div class="bg-gradient-to-r from-wood to-water text-white px-6 sm:px-9 py-6">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <!-- 同步顯示使用者上傳的 Logo 容器（若尚未上傳則自動隱藏） -->
+            <div
+              id="result-logo-wrapper"
+              class="hidden w-12 h-12 rounded-xl bg-white/95 p-0.5 overflow-hidden shrink-0 shadow-sm"
+            >
+              <img
+                id="result-logo-img"
+                src=""
+                alt="三木水工作室 Logo"
+                class="w-full h-full object-cover rounded-[10px]"
+              />
+            </div>
+
+            <div>
+              <span class="block text-xs text-white/80 tracking-wider mb-0.5">
+                三木水工作室 · 隨寫即時整理
+              </span>
+              <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-wide">
+                決策整理單
+              </h2>
+            </div>
+          </div>
+
+          <span id="result-today-date" class="text-xs text-white/80 shrink-0"></span>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-9 space-y-7">
+        <!-- 1. 猶豫選項與卡住現況 -->
+        <div>
+          <h3 class="font-serif text-base sm:text-lg font-bold text-ink mb-3">
+            目前的猶豫選項
+          </h3>
+          <div class="bg-mist/85 border border-borderline rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <div class="flex-1 bg-white border border-borderline rounded-xl px-4 py-2.5">
+                <span class="block text-[11px] text-ink-muted">選項 A</span>
+                <span id="out-choice-a" class="text-sm sm:text-base font-medium text-ink">尚未填寫</span>
+              </div>
+              <span class="self-center px-2.5 py-0.5 rounded-full bg-wood-tint text-wood text-xs font-semibold">
+                或
+              </span>
+              <div class="flex-1 bg-white border border-borderline rounded-xl px-4 py-2.5">
+                <span class="block text-[11px] text-ink-muted">選項 B</span>
+                <span id="out-choice-b" class="text-sm sm:text-base font-medium text-ink">尚未填寫</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2.5 border-t border-borderline/70 text-xs sm:text-sm">
+              <div>
+                <span class="text-ink-muted">卡住時間：</span>
+                <span id="out-stuck-time" class="font-medium text-ink">尚未填寫</span>
+              </div>
+              <div>
+                <span class="text-ink-muted">拖著的影響：</span>
+                <span id="out-delay-impact" class="font-medium text-water">尚未填寫</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 事實 vs. 擔心 雙欄對照 -->
+        <div>
+          <h3 class="font-serif text-base sm:text-lg font-bold text-ink mb-3">
+            事實與擔心的對照
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div class="bg-wood-tint/55 border border-wood/20 rounded-2xl p-4 sm:p-5">
+              <span class="block text-xs font-bold text-wood mb-2">已經確定的事實</span>
+              <p id="out-facts" class="text-sm text-ink leading-[1.75] whitespace-pre-line">尚未填寫</p>
+            </div>
+            <div class="bg-water-tint/60 border border-water/20 rounded-2xl p-4 sm:p-5">
+              <span class="block text-xs font-bold text-water mb-2">腦袋自己補上的擔心</span>
+              <p id="out-worries" class="text-sm text-ink leading-[1.75] whitespace-pre-line">尚未填寫</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 勾選的卡關點與對應短評 -->
+        <div>
+          <h3 class="font-serif text-base sm:text-lg font-bold text-ink mb-3">
+            你現在卡住的地方與提醒
+          </h3>
+          <div id="out-stuck-feedback" class="space-y-3">
+            <!-- 動態渲染勾選卡片對應的短評 -->
+          </div>
+        </div>
+
+        <!-- 4. 換個時間距離看這件事（10 天後 / 10 個月後 / 10 年後） -->
+        <div>
+          <h3 class="font-serif text-base sm:text-lg font-bold text-ink mb-3">
+            換個時間距離看這件事
+          </h3>
+          <div class="bg-mist/85 border border-borderline rounded-2xl p-4 sm:p-5">
+            <div class="grid grid-cols-3 gap-1.5 p-1 bg-white border border-borderline rounded-xl mb-3.5" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                data-distance="10d"
+                aria-selected="true"
+                class="distance-tab py-2 px-2 rounded-lg text-xs sm:text-sm font-medium bg-water text-white transition-all cursor-pointer"
+              >
+                10 天後
+              </button>
+              <button
+                type="button"
+                role="tab"
+                data-distance="10m"
+                aria-selected="false"
+                class="distance-tab py-2 px-2 rounded-lg text-xs sm:text-sm font-medium text-ink-muted hover:text-ink transition-all cursor-pointer"
+              >
+                10 個月後
+              </button>
+              <button
+                type="button"
+                role="tab"
+                data-distance="10y"
+                aria-selected="false"
+                class="distance-tab py-2 px-2 rounded-lg text-xs sm:text-sm font-medium text-ink-muted hover:text-ink transition-all cursor-pointer"
+              >
+                10 年後
+              </button>
+            </div>
+
+            <p id="out-distance-text" class="text-sm sm:text-base text-ink leading-[1.75] px-1">
+              情緒大概退了一半。這件事對你下禮拜的生活作息、工作進度，實際影響有多大？
+            </p>
+          </div>
+        </div>
+
+        <!-- 5. 明天睡前的小試探 -->
+        <div>
+          <h3 class="font-serif text-base sm:text-lg font-bold text-ink mb-3">
+            明天睡前能做的小試探
+          </h3>
+          <div class="bg-wood-tint/55 border border-wood/25 rounded-2xl p-4 sm:p-5">
+            <p id="out-small-step" class="text-sm sm:text-base font-medium text-ink leading-[1.75]">
+              尚未填寫
+            </p>
+          </div>
+        </div>
+
+        <!-- 6. 底部預約對談引導區（並列雙按鈕：複製整理內容 ＋ 前往三木水官方 LINE） -->
+        <div class="pt-6 border-t border-borderline">
+          <div class="bg-gradient-to-br from-wood-tint/70 to-water-tint/70 border border-borderline rounded-2xl p-5 sm:p-7">
+            <p class="text-sm sm:text-base text-ink leading-[1.8] mb-5">
+              輪廓大概出來了嗎？如果你看清楚了方向，但要踏出那一步還是覺得卡卡的，可以把這份整理貼到三木水官方 LINE 給我。我們約個時間，直接針對你卡住的地方一起理順。
+            </p>
+
+            <!-- 兩個並列的主要行動按鈕 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                id="copy-note-btn"
+                class="py-3.5 px-5 rounded-2xl bg-wood hover:bg-wood-hover text-white font-medium text-sm sm:text-base shadow-soft transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>複製整理內容</span>
+              </button>
+
+              <a
+                href="https://lin.ee/sqUy2Lx"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#1D6B4B] to-[#06B84E] hover:brightness-95 text-white font-medium text-sm sm:text-base shadow-soft transition-all flex items-center justify-center gap-2"
+              >
+                <span>前往三木水官方 LINE</span>
+              </a>
+            </div>
+
+            <!-- 點擊複製後顯示的提示訊息 -->
+            <p
+              id="copy-status-msg"
+              class="hidden mt-3 text-center text-xs sm:text-sm font-medium text-wood bg-white/90 border border-wood/25 rounded-xl py-2 px-3"
+            >
+              已複製，可直接貼到 LINE 傳送
+            </p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- 頁尾品牌落款與官方 LINE 連結 -->
+  <footer class="relative z-10 w-full max-w-[720px] mx-auto px-4 sm:px-6 py-7 text-center text-xs text-ink-muted space-y-2">
+    <div>
+      <a
+        href="https://lin.ee/sqUy2Lx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 text-wood hover:text-wood-hover font-medium underline underline-offset-4"
+      >
+        <span>聯繫三木水官方 LINE（@three.tree.water）</span>
+      </a>
+    </div>
+    <p>三木水工作室 · 陪你把思緒寫下來，看清自己的選擇</p>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- 互動與狀態同步腳本                          -->
+  <!-- ========================================== -->
+  <script>
+    // 1. 品牌 Logo 本地儲存鍵值
+    const LOGO_STORAGE_KEY = 'three_tree_water_brand_logo_v1';
+
+    // 2. 四種卡關狀態與對應短評資料（自然口語對話感）
+    const STUCK_OPTIONS = [
+      {
+        id: 'fear_wrong',
+        title: '怕選錯就回不了頭',
+        desc: '總覺得選了 A 就等於把 B 的路封死，想等到一個確定不會後悔的答案才敢動。',
+        comment: '你現在一直在找一個「保證不會後悔」的選項。但說實話，很多決定在還沒踏出去之前，根本算不出百分百的結果。與其停在原地把所有風險想一遍，不如先挑一個就算走歪、你也有辦法調整的方向。'
+      },
+      {
+        id: 'sunk_cost',
+        title: '捨不得已經投進去的成本',
+        desc: '心裡隱約知道該停了，但想到前面已經花了這麼多時間、力氣或錢，就覺得很不甘心。',
+        comment: '你糾結的重點，可能已經不是哪邊比較好，而是不甘心。前面花掉的時間跟力氣，不管你最後選哪一邊都拿不回來了。現在真正要算的是：未來三個月，你還願不願意繼續把時間賠在這裡？'
+      },
+      {
+        id: 'disappoint_others',
+        title: '怕讓身邊的人失望',
+        desc: '其實自己心裡有譜，但一想到做了這個決定會影響別人、或讓關係變尷尬，就縮回來了。',
+        comment: '你其實沒有那麼不知道該怎麼選，你只是不想當那個破壞氣氛、或讓別人難過的人。但把決定權交給別人的期待，最後承擔日常生活的還是你自己。先分清楚，這是誰的人生課題。'
+      },
+      {
+        id: 'too_many_voices',
+        title: '問了太多人，腦袋反而更亂',
+        desc: '查了一堆資料、也問過一輪朋友，每個人的建議聽起來都對，結果更不知道該聽誰的。',
+        comment: '你蒐集了夠多意見了，現在缺的不是資訊，是安靜。每個人給建議都是站在他的經驗跟立場，沒有人要替你的選擇負責。先把別人的聲音關掉一天，問問看：如果沒人知道你選了什麼，你會怎麼選？'
+      }
+    ];
+
+    // 3. 換個時間距離看這件事（10 天後 / 10 個月後 / 10 年後）
+    const DISTANCE_VIEWS = {
+      '10d': '情緒大概退了一半。這件事對你下禮拜的生活作息、工作進度，實際影響有多大？',
+      '10m': '回頭看今天的猶豫，你比較可能後悔「當時太衝動」，還是後悔「拖太久沒動作」？',
+      '10y': '把時間拉長到十年，這件事在整個人生裡佔的比例有多重？它真的有現在感覺的那麼可怕嗎？'
+    };
+
+    // 4. 填寫範例資料（方便使用者或品牌主測試預覽）
+    const SAMPLE_DATA = {
+      choiceA: '留在原職',
+      choiceB: '轉職接案',
+      stuckTime: '兩個月',
+      delayImpact: '每天睡不好、工作也沒辦法專心',
+      facts: '存款還有 15 萬，合約下週五到期，下班後每週有兩個晚上可以接案。',
+      worries: '怕離職後找不到下一份，怕收入不穩定讓家人擔心。',
+      selectedStuck: ['fear_wrong', 'sunk_cost'],
+      smallStep: '約有經驗的人聊半小時，問清楚剛開始接案的前三個月是怎麼度過的'
+    };
+
+    // 5. 應用程式即時狀態
+    const state = {
+      choiceA: '',
+      choiceB: '',
+      stuckTime: '',
+      delayImpact: '',
+      facts: '',
+      worries: '',
+      selectedStuck: [],
+      smallStep: '',
+      activeDistance: '10d'
+    };
+
+    // 6. 輕量浮動提示控制（不使用 alert）
+    let toastTimer = null;
+    function showToast(text) {
+      const box = document.getElementById('toast-box');
+      const textEl = document.getElementById('toast-text');
+      textEl.textContent = text;
+      box.classList.remove('opacity-0', 'translate-y-3');
+      box.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        box.classList.remove('opacity-100', 'translate-y-0');
+        box.classList.add('opacity-0', 'translate-y-3');
+      }, 2800);
+    }
+
+    // 7. 品牌 Logo 顯示與同步控制（支援手動寫死 src 與本機上傳 localStorage）
+    function applyBrandLogo(srcUrl) {
+      const topImg = document.getElementById('brand-logo-img');
+      const placeholderText = document.getElementById('logo-placeholder-text');
+      const hoverOverlay = document.getElementById('logo-hover-overlay');
+      const triggerBtn = document.getElementById('logo-upload-trigger');
+
+      const resultWrapper = document.getElementById('result-logo-wrapper');
+      const resultImg = document.getElementById('result-logo-img');
+
+      if (srcUrl && srcUrl.trim() !== '') {
+        topImg.src = srcUrl;
+        topImg.classList.remove('hidden');
+        placeholderText.classList.add('hidden');
+
+        // 顯示滑鼠懸停時的「更換」提示，並將外框從虛線改為實線
+        hoverOverlay.classList.remove('hidden');
+        hoverOverlay.classList.add('flex');
+        triggerBtn.classList.remove('border-dashed');
+        triggerBtn.classList.add('border-solid', 'border-borderline');
+
+        // 同步顯示於最終「決策整理單」上方
+        resultImg.src = srcUrl;
+        resultWrapper.classList.remove('hidden');
+      } else {
+        topImg.src = '';
+        topImg.classList.add('hidden');
+        placeholderText.classList.remove('hidden');
+        hoverOverlay.classList.add('hidden');
+        hoverOverlay.classList.remove('flex');
+        triggerBtn.classList.add('border-dashed');
+        triggerBtn.classList.remove('border-solid', 'border-borderline');
+
+        resultImg.src = '';
+        resultWrapper.classList.add('hidden');
+      }
+    }
+
+    function initBrandLogo() {
+      const topImg = document.getElementById('brand-logo-img');
+      const fileInput = document.getElementById('logo-file-input');
+      const triggerBtn = document.getElementById('logo-upload-trigger');
+
+      // 優先檢查 HTML 原始碼是否已手動填入 src（例如部署時填入 ./logo.png）
+      const inlineSrc = topImg.getAttribute('src');
+      if (inlineSrc && inlineSrc.trim() !== '') {
+        applyBrandLogo(inlineSrc.trim());
+      } else {
+        // 否則檢查 localStorage 是否存有使用者先前上傳的 Logo
+        try {
+          const savedLogo = localStorage.getItem(LOGO_STORAGE_KEY);
+          if (savedLogo) {
+            applyBrandLogo(savedLogo);
+          }
+        } catch (err) {
+          // 忽略無痕模式或儲存空間限制錯誤
+        }
+      }
+
+      // 點擊預留框開啟檔案選擇器
+      triggerBtn.addEventListener('click', () => {
+        fileInput.click();
+      });
+
+      // 讀取使用者選擇的圖片並即時預覽、存入 localStorage
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+          showToast('請選擇圖片格式的檔案');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          applyBrandLogo(dataUrl);
+          try {
+            localStorage.setItem(LOGO_STORAGE_KEY, dataUrl);
+          } catch (err) {
+            // 若圖片過大超出 localStorage 上限，仍保留當次頁面預覽
+          }
+          showToast('品牌 Logo 已更新');
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // 8. 渲染第三區「看看自己卡在哪一關」複選卡片
+    function renderStuckCards() {
+      const container = document.getElementById('stuck-cards-grid');
+      container.innerHTML = STUCK_OPTIONS.map((item) => {
+        const checked = state.selectedStuck.includes(item.id);
+        return `
+          <div
+            role="checkbox"
+            aria-checked="${checked}"
+            tabindex="0"
+            data-stuck-id="${item.id}"
+            class="stuck-card rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-wood/40 ${
+              checked
+                ? 'bg-wood-tint/80 border-wood shadow-soft'
+                : 'bg-mist/55 border-borderline hover:border-wood/45 hover:bg-white'
+            }"
+          >
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <h3 class="font-serif text-base font-bold ${checked ? 'text-wood' : 'text-ink'}">
+                ${item.title}
+              </h3>
+              <span class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
+                checked
+                  ? 'bg-wood border-wood text-white'
+                  : 'bg-white border-borderline text-transparent'
+              }">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            </div>
+            <p class="text-xs sm:text-sm text-ink-muted leading-[1.7]">
+              ${item.desc}
+            </p>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.stuck-card').forEach((card) => {
+        const toggle = () => {
+          const id = card.getAttribute('data-stuck-id');
+          const idx = state.selectedStuck.indexOf(id);
+          if (idx > -1) {
+            state.selectedStuck.splice(idx, 1);
+          } else {
+            state.selectedStuck.push(id);
+          }
+          renderStuckCards();
+          updateLiveResult();
+        };
+
+        card.addEventListener('click', toggle);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggle();
+          }
+        });
+      });
+    }
+
+    // 9. 即時更新進度條與「決策整理單」結果區
+    function updateLiveResult() {
+      // 更新今日日期
+      const now = new Date();
+      document.getElementById('result-today-date').textContent =
+        `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+
+      // 區塊一輸出
+      document.getElementById('out-choice-a').textContent = state.choiceA || '尚未填寫';
+      document.getElementById('out-choice-b').textContent = state.choiceB || '尚未填寫';
+      document.getElementById('out-stuck-time').textContent = state.stuckTime || '尚未填寫';
+      document.getElementById('out-delay-impact').textContent = state.delayImpact || '尚未填寫';
+
+      // 區塊二輸出
+      document.getElementById('out-facts').textContent = state.facts || '尚未填寫';
+      document.getElementById('out-worries').textContent = state.worries || '尚未填寫';
+
+      // 區塊三輸出：卡關點與對應短評
+      const feedbackContainer = document.getElementById('out-stuck-feedback');
+      const matchedItems = STUCK_OPTIONS.filter((opt) => state.selectedStuck.includes(opt.id));
+
+      if (matchedItems.length === 0) {
+        feedbackContainer.innerHTML = `
+          <div class="bg-mist/70 border border-borderline rounded-2xl p-4 text-xs sm:text-sm text-ink-muted">
+            在上方「3. 看看自己卡在哪一關」勾選最像你的狀態後，這裡會出現對應的提醒。
+          </div>
+        `;
+      } else {
+        feedbackContainer.innerHTML = matchedItems.map((item) => `
+          <div class="bg-mist/85 border border-borderline rounded-2xl p-4 sm:p-5">
+            <span class="inline-block px-2.5 py-0.5 rounded-lg bg-wood-tint text-wood text-xs font-bold mb-2">
+              ${item.title}
+            </span>
+            <p class="text-sm text-ink leading-[1.75]">
+              ${item.comment}
+            </p>
+          </div>
+        `).join('');
+      }
+
+      // 區塊四輸出：明日小試探
+      document.getElementById('out-small-step').textContent = state.smallStep || '尚未填寫';
+
+      // 計算四個區塊的完成進度並更新頂部進度條
+      const step1Done = Boolean(state.choiceA || state.choiceB || state.stuckTime || state.delayImpact);
+      const step2Done = Boolean(state.facts || state.worries);
+      const step3Done = state.selectedStuck.length > 0;
+      const step4Done = Boolean(state.smallStep);
+
+      const completedCount = [step1Done, step2Done, step3Done, step4Done].filter(Boolean).length;
+      document.getElementById('progress-fill').style.width = `${completedCount * 25}%`;
+
+      // 同步頂部四個步驟標籤的完成狀態樣式
+      const stepFlags = [step1Done, step2Done, step3Done, step4Done];
+      document.querySelectorAll('.step-nav-item').forEach((navEl, index) => {
+        if (stepFlags[index]) {
+          navEl.classList.remove('text-ink-muted');
+          navEl.classList.add('text-wood', 'bg-wood-tint/60');
+        } else {
+          navEl.classList.add('text-ink-muted');
+          navEl.classList.remove('text-wood', 'bg-wood-tint/60');
+        }
+      });
+
+      // 每次修改內容時，先隱藏舊的複製成功提示
+      document.getElementById('copy-status-msg').classList.add('hidden');
+    }
+
+    // 10. 切換「換個時間距離看這件事」分頁
+    function switchDistanceTab(key) {
+      state.activeDistance = key;
+      document.querySelectorAll('.distance-tab').forEach((btn) => {
+        const isCurrent = btn.getAttribute('data-distance') === key;
+        btn.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+        if (isCurrent) {
+          btn.classList.add('bg-water', 'text-white');
+          btn.classList.remove('text-ink-muted', 'hover:text-ink');
+        } else {
+          btn.classList.remove('bg-water', 'text-white');
+          btn.classList.add('text-ink-muted', 'hover:text-ink');
+        }
+      });
+      document.getElementById('out-distance-text').textContent = DISTANCE_VIEWS[key];
+    }
+
+    // 11. 同步輸入框與狀態
+    function syncFieldsFromState() {
+      document.getElementById('input-choice-a').value = state.choiceA;
+      document.getElementById('input-choice-b').value = state.choiceB;
+      document.getElementById('input-stuck-time').value = state.stuckTime;
+      document.getElementById('input-delay-impact').value = state.delayImpact;
+      document.getElementById('input-facts').value = state.facts;
+      document.getElementById('input-worries').value = state.worries;
+      document.getElementById('input-small-step').value = state.smallStep;
+      renderStuckCards();
+      updateLiveResult();
+    }
+
+    // 12. 組合純文字並複製到剪貼簿（採用 execCommand 相容 iframe 環境）
+    function copy整理內容() {
+      const matchedItems = STUCK_OPTIONS.filter((opt) => state.selectedStuck.includes(opt.id));
+      const stuckSummary = matchedItems.length > 0
+        ? matchedItems.map((m) => `・${m.title}\n  ${m.comment}`).join('\n\n')
+        : '・尚未勾選';
+
+      const plainText = [
+        '【三木水｜決策整理單】',
+        `猶豫選項：「${state.choiceA || '未填寫'}」還是「${state.choiceB || '未填寫'}」`,
+        `卡住時間：${state.stuckTime || '未填寫'}`,
+        `拖著的影響：${state.delayImpact || '未填寫'}`,
+        '',
+        '【已經確定的事實】',
+        state.facts || '未填寫',
+        '',
+        '【腦袋自己補上的擔心】',
+        state.worries || '未填寫',
+        '',
+        '【卡關點與提醒】',
+        stuckSummary,
+        '',
+        '【明天睡前能做的小試探】',
+        state.smallStep || '未填寫',
+        '',
+        '整理自：三木水工作室（@three.tree.water）'
+      ].join('\n');
+
+      const helperArea = document.createElement('textarea');
+      helperArea.value = plainText;
+      helperArea.setAttribute('readonly', '');
+      helperArea.style.position = 'fixed';
+      helperArea.style.left = '-9999px';
+      document.body.appendChild(helperArea);
+      helperArea.select();
+      helperArea.setSelectionRange(0, helperArea.value.length);
+
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        success = false;
+      }
+      document.body.removeChild(helperArea);
+
+      if (!success && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(plainText).catch(() => {});
+      }
+
+      document.getElementById('copy-status-msg').classList.remove('hidden');
+      showToast('已複製，可直接貼到 LINE 傳送');
+    }
+
+    // 13. 初始化所有事件監聽
+    document.addEventListener('DOMContentLoaded', () => {
+      initBrandLogo();
+      renderStuckCards();
+      updateLiveResult();
+
+      // 綁定文字輸入框即時更新
+      const fieldBindings = [
+        { id: 'input-choice-a', key: 'choiceA' },
+        { id: 'input-choice-b', key: 'choiceB' },
+        { id: 'input-stuck-time', key: 'stuckTime' },
+        { id: 'input-delay-impact', key: 'delayImpact' },
+        { id: 'input-facts', key: 'facts' },
+        { id: 'input-worries', key: 'worries' },
+        { id: 'input-small-step', key: 'smallStep' }
+      ];
+
+      fieldBindings.forEach(({ id, key }) => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[key] = e.target.value.trim();
+          updateLiveResult();
+        });
+      });
+
+      // 靈感標籤點擊帶入
+      document.querySelectorAll('.idea-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const idea = chip.getAttribute('data-idea');
+          const box = document.getElementById('input-small-step');
+          const current = box.value.trim();
+          if (!current) {
+            box.value = idea;
+          } else if (!current.includes(idea)) {
+            box.value = `${current}；${idea}`;
+          }
+          state.smallStep = box.value.trim();
+          updateLiveResult();
+          box.focus();
+        });
+      });
+
+      // 時間距離分頁切換
+      document.querySelectorAll('.distance-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          switchDistanceTab(tab.getAttribute('data-distance'));
+        });
+      });
+
+      // 點擊「整理出我的決策筆記」平滑捲動至結果卡片
+      document.getElementById('generate-note-btn').addEventListener('click', () => {
+        updateLiveResult();
+        document.getElementById('result-sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      // 點擊「複製整理內容」
+      document.getElementById('copy-note-btn').addEventListener('click', copy整理內容);
+
+      // 點擊「先看填寫範例」
+      document.getElementById('fill-demo-btn').addEventListener('click', () => {
+        state.choiceA = SAMPLE_DATA.choiceA;
+        state.choiceB = SAMPLE_DATA.choiceB;
+        state.stuckTime = SAMPLE_DATA.stuckTime;
+        state.delayImpact = SAMPLE_DATA.delayImpact;
+        state.facts = SAMPLE_DATA.facts;
+        state.worries = SAMPLE_DATA.worries;
+        state.selectedStuck = [...SAMPLE_DATA.selectedStuck];
+        state.smallStep = SAMPLE_DATA.smallStep;
+        syncFieldsFromState();
+        showToast('已帶入填寫範例，你可以直接修改或往下看整理單');
+      });
+
+      // 點擊「清空重填」
+      document.getElementById('clear-all-btn').addEventListener('click', () => {
+        state.choiceA = '';
+        state.choiceB = '';
+        state.stuckTime = '';
+        state.delayImpact = '';
+        state.facts = '';
+        state.worries = '';
+        state.selectedStuck = [];
+        state.smallStep = '';
+        syncFieldsFromState();
+        showToast('已清空內容，可以重新開始寫');
+      });
+    });
+  </script>
+</body>
+</html>
