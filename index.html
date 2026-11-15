@@ -81,16 +81,24 @@
       transform: scale(1.03);
     }
 
-    /* 句中填空輸入框樣式 */
-    .inline-fill-input {
-      background-color: #F7FBFA;
-      border-bottom: 2px solid #B8CEC9;
-      transition: all 0.2s ease;
+    /* 句型填空輸入格：白底微立體邊框，清楚區分可填寫區域 */
+    .fill-slot-input {
+      background-color: #FFFFFF;
+      border: 1.5px solid #CFE0DC;
+      box-shadow: inset 0 1px 2px rgba(30, 45, 43, 0.04);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
-    .inline-fill-input:focus {
+    .fill-slot-input:hover {
+      border-color: #9FBAB4;
+    }
+    .fill-slot-input:focus {
       outline: none;
-      background-color: #E4EFEA;
-      border-bottom-color: #245243;
+      border-color: #245243;
+      box-shadow: 0 0 0 3px rgba(36, 82, 67, 0.12);
+    }
+    .fill-slot-input--water:focus {
+      border-color: #285978;
+      box-shadow: 0 0 0 3px rgba(40, 89, 120, 0.12);
     }
 
     /* 自訂捲軸，維持頁面清爽 */
@@ -245,50 +253,67 @@
           1. 先把卡住的那件事框出來
         </h2>
         <p class="text-ink-muted text-sm sm:text-base">
-          不用寫長篇大論，先用下面三句話把現在糾結的範圍定下來。
+          不用寫長篇大論，先用下面三格把現在糾結的範圍定下來。
         </p>
       </div>
 
-      <!-- 句型填空框 -->
-      <div class="bg-mist/75 border border-borderline rounded-2xl p-5 sm:p-6 space-y-5 text-sm sm:text-base text-ink leading-[1.9]">
+      <!-- 句型填空框：分格結構避免手機版引號斷行，清楚標示填寫位置 -->
+      <div class="bg-mist/85 border border-borderline rounded-2xl p-4 sm:p-6 space-y-5 text-sm sm:text-base text-ink">
+        <!-- 第一格：選項 A 與 選項 B 並列填寫格 -->
         <div>
-          <span>我想在「</span>
-          <input
-            type="text"
-            id="input-choice-a"
-            placeholder="例如：留在原職"
-            class="inline-fill-input w-full sm:w-auto sm:min-w-[190px] px-3 py-1 my-1 rounded-lg text-wood font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
-          />
-          <span>」和「</span>
-          <input
-            type="text"
-            id="input-choice-b"
-            placeholder="例如：轉職接案"
-            class="inline-fill-input w-full sm:w-auto sm:min-w-[190px] px-3 py-1 my-1 rounded-lg text-wood font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
-          />
-          <span>」之間做決定</span>
+          <p class="font-medium text-ink mb-2.5">我想在這兩個選項之間做決定：</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-2.5 bg-white border border-borderline focus-within:border-wood focus-within:ring-2 focus-within:ring-wood/15 rounded-xl px-3.5 py-2.5 shadow-2xs transition-all">
+              <span class="px-2 py-0.5 rounded-md bg-wood-tint text-wood text-xs font-bold shrink-0">選項 A</span>
+              <input
+                type="text"
+                id="input-choice-a"
+                placeholder="例如：留在原職"
+                class="w-full bg-transparent text-sm sm:text-base text-wood font-medium placeholder:text-ink-muted/50 placeholder:font-normal focus:outline-none"
+              />
+            </label>
+
+            <label class="flex items-center gap-2.5 bg-white border border-borderline focus-within:border-water focus-within:ring-2 focus-within:ring-water/15 rounded-xl px-3.5 py-2.5 shadow-2xs transition-all">
+              <span class="px-2 py-0.5 rounded-md bg-water-tint text-water text-xs font-bold shrink-0">選項 B</span>
+              <input
+                type="text"
+                id="input-choice-b"
+                placeholder="例如：轉職接案"
+                class="w-full bg-transparent text-sm sm:text-base text-water font-medium placeholder:text-ink-muted/50 placeholder:font-normal focus:outline-none"
+              />
+            </label>
+          </div>
         </div>
 
-        <div class="pt-3 border-t border-borderline/70">
-          <span>這件事已經在我腦袋裡轉了大概「</span>
-          <input
-            type="text"
-            id="input-stuck-time"
-            placeholder="例如：兩週、三個月"
-            class="inline-fill-input w-full sm:w-auto sm:min-w-[160px] px-3 py-1 my-1 rounded-lg text-wood font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
-          />
-          <span>（天／週／月）」</span>
+        <!-- 第二格：糾結時間 -->
+        <div class="pt-4 border-t border-borderline/75">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <label for="input-stuck-time" class="font-medium text-ink shrink-0">
+              這件事已經在我腦袋裡轉了大概：
+            </label>
+            <div class="flex items-center gap-2 flex-1">
+              <input
+                type="text"
+                id="input-stuck-time"
+                placeholder="例如：兩週、三個月"
+                class="fill-slot-input w-full sm:max-w-[210px] px-3.5 py-2 rounded-xl text-sm sm:text-base text-wood font-medium placeholder:text-ink-muted/50 placeholder:font-normal"
+              />
+              <span class="text-xs sm:text-sm text-ink-muted shrink-0">（天／週／月）</span>
+            </div>
+          </div>
         </div>
 
-        <div class="pt-3 border-t border-borderline/70">
-          <span>如果繼續拖著不決定，最直接的影響是「</span>
+        <!-- 第三格：拖著不決定的影響 -->
+        <div class="pt-4 border-t border-borderline/75">
+          <label for="input-delay-impact" class="block font-medium text-ink mb-2">
+            如果繼續拖著不決定，最直接的影響是：
+          </label>
           <input
             type="text"
             id="input-delay-impact"
             placeholder="例如：每天睡不好、工作也沒辦法專心"
-            class="inline-fill-input w-full sm:w-auto sm:min-w-[270px] px-3 py-1 my-1 rounded-lg text-water font-medium placeholder:text-ink-muted/55 placeholder:font-normal"
+            class="fill-slot-input fill-slot-input--water w-full px-3.5 py-2.5 rounded-xl text-sm sm:text-base text-water font-medium placeholder:text-ink-muted/50 placeholder:font-normal"
           />
-          <span>」</span>
         </div>
       </div>
     </section>
@@ -307,35 +332,47 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-        <!-- 左欄：確定已經發生的事實（森林深綠主題） -->
-        <div class="bg-wood-tint/55 border border-wood/20 rounded-2xl p-4 sm:p-5 flex flex-col">
-          <h3 class="font-serif text-base font-bold text-wood mb-1.5">
-            確定已經發生的事實
-          </h3>
+        <!-- 左欄：確定已經發生的事實 -->
+        <div class="bg-wood-tint/55 border border-wood/25 rounded-2xl p-4 sm:p-5 flex flex-col">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <h3 class="font-serif text-base font-bold text-wood flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-wood"></span>
+              <span>確定已經發生的事實</span>
+            </h3>
+            <span class="text-[11px] text-wood/80 bg-white/80 px-2 py-0.5 rounded-md border border-wood/15">
+              客觀條件
+            </span>
+          </div>
           <label for="input-facts" class="text-xs sm:text-sm text-ink-muted leading-relaxed mb-3">
             拿掉猜測，目前百分之百確定、有根據的狀況有哪些？
           </label>
           <textarea
             id="input-facts"
             rows="5"
-            placeholder="例如：存款還有 15 萬、對方三天沒回訊息、合約下週五到期"
-            class="w-full flex-1 bg-white border border-borderline focus:border-wood focus:outline-none rounded-xl p-3.5 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/55 resize-none transition-colors"
+            placeholder="・存款還有 15 萬&#10;・對方三天沒回訊息&#10;・合約下週五到期"
+            class="w-full flex-1 min-h-[168px] bg-white border border-wood/25 focus:border-wood focus:ring-2 focus:ring-wood/15 focus:outline-none rounded-xl px-3.5 py-2.5 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/50 resize-y transition-all"
           ></textarea>
         </div>
 
-        <!-- 右欄：還沒發生、腦袋自己先演完的畫面（海洋湖藍主題） -->
-        <div class="bg-water-tint/60 border border-water/20 rounded-2xl p-4 sm:p-5 flex flex-col">
-          <h3 class="font-serif text-base font-bold text-water mb-1.5">
-            還沒發生、腦袋自己先演完的畫面
-          </h3>
+        <!-- 右欄：還沒發生、腦袋自己先演完的畫面 -->
+        <div class="bg-water-tint/60 border border-water/25 rounded-2xl p-4 sm:p-5 flex flex-col">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <h3 class="font-serif text-base font-bold text-water flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-water"></span>
+              <span>還沒發生、腦袋自己先演完的畫面</span>
+            </h3>
+            <span class="text-[11px] text-water/80 bg-white/80 px-2 py-0.5 rounded-md border border-water/15">
+              腦中預演
+            </span>
+          </div>
           <label for="input-worries" class="text-xs sm:text-sm text-ink-muted leading-relaxed mb-3">
             你現在最怕發生的情節是什麼？
           </label>
           <textarea
             id="input-worries"
             rows="5"
-            placeholder="例如：怕離職後找不到下一份、怕主動問了會連朋友都做不成"
-            class="w-full flex-1 bg-white border border-borderline focus:border-water focus:outline-none rounded-xl p-3.5 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/55 resize-none transition-colors"
+            placeholder="・怕離職後找不到下一份&#10;・怕主動問了會連朋友都做不成"
+            class="w-full flex-1 min-h-[168px] bg-white border border-water/25 focus:border-water focus:ring-2 focus:ring-water/15 focus:outline-none rounded-xl px-3.5 py-2.5 text-sm sm:text-base text-ink leading-[1.75] placeholder:text-ink-muted/50 resize-y transition-all"
           ></textarea>
         </div>
       </div>
@@ -910,7 +947,7 @@
       }
 
       document.getElementById('copy-status-msg').classList.remove('hidden');
-      showToast('已複製，可直接貼到三木水官方 LINE');
+      showToast('直接貼到三木水官方 LINE');
     }
 
     // 10. 初始化所有事件監聽
