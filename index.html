@@ -396,7 +396,7 @@
         <!-- 由 JS 渲染並同步狀態 -->
       </div>
 
-            <!-- 自訂空白填寫格 -->
+      <!-- 自訂空白填寫格 -->
       <div id="custom-stuck-box" class="mt-3.5 rounded-2xl p-4 sm:p-5 border border-borderline bg-mist/55 transition-all">
         <label for="input-custom-stuck" class="block font-serif text-base font-bold text-ink mb-1.5">
           其他卡住的狀態（自己填寫）
@@ -739,165 +739,206 @@
       facts: '',
       worries: '',
       selectedStuck: [],
+      customStuck: '',
       smallStep: '',
       activeDistance: '10d'
     };
 
-    // 4. 輕量浮動提示控制（不使用 alert）
     let toastTimer = null;
-    function showToast(text) {
-      const box = document.getElementById('toast-box');
-      const textEl = document.getElementById('toast-text');
-      textEl.textContent = text;
-      box.classList.remove('opacity-0', 'translate-y-3');
-      box.classList.add('opacity-100', 'translate-y-0');
 
-      if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        box.classList.remove('opacity-100', 'translate-y-0');
-        box.classList.add('opacity-0', 'translate-y-3');
-      }, 2800);
+    // 轉義使用者輸入的特殊字元，避免影響頁面排版
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    // 5. 渲染第三區「你現在遲遲沒動，最接近哪一種狀態？（可複選）」卡片
+    // 4. 輕量浮動提示控制（不使用 alert）
+    function showToast(message) {
+      const toastBox = document.getElementById('toast-box');
+      const toastText = document.getElementById('toast-text');
+      if (!toastBox || !toastText) return;
+
+      if (toastTimer) {
+        clearTimeout(toastTimer);
+      }
+
+      toastText.textContent = message;
+      toastBox.classList.remove('opacity-0', 'translate-y-3');
+      toastBox.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimer = setTimeout(() => {
+        toastBox.classList.add('opacity-0', 'translate-y-3');
+        toastBox.classList.remove('opacity-100', 'translate-y-0');
+      }, 2600);
+    }
+
+    // 5. 渲染第三步驟四張可複選卡關狀態卡片
     function renderStuckCards() {
-      const container = document.getElementById('stuck-cards-grid');
-      container.innerHTML = STUCK_OPTIONS.map((item) => {
-        const checked = state.selectedStuck.includes(item.id);
+      const grid = document.getElementById('stuck-cards-grid');
+      if (!grid) return;
+
+      grid.innerHTML = STUCK_OPTIONS.map((opt) => {
+        const isSelected = state.selectedStuck.includes(opt.id);
+        const cardStyle = isSelected
+          ? 'bg-wood-tint/85 border-wood shadow-soft'
+          : 'bg-mist/55 hover:bg-mist border-borderline hover:border-wood/40';
+        const badgeStyle = isSelected
+          ? 'bg-wood border-wood text-white'
+          : 'bg-white border-borderline text-transparent';
+
         return `
           <div
             role="checkbox"
-            aria-checked="${checked}"
             tabindex="0"
-            data-stuck-id="${item.id}"
-            class="stuck-card rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-wood/40 ${
-              checked
-                ? 'bg-wood-tint/80 border-wood shadow-soft'
-                : 'bg-mist/55 border-borderline hover:border-wood/45 hover:bg-white'
-            }"
+            aria-checked="${isSelected}"
+            data-stuck-id="${opt.id}"
+            class="stuck-card rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer select-none ${cardStyle}"
           >
             <div class="flex items-start justify-between gap-3 mb-2">
-              <h3 class="font-serif text-base font-bold ${checked ? 'text-wood' : 'text-ink'}">
-                ${item.title}
+              <h3 class="font-serif text-base font-bold text-ink leading-snug">
+                ${escapeHtml(opt.title)}
               </h3>
-              <span class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border transition-colors ${
-                checked
-                  ? 'bg-wood border-wood text-white'
-                  : 'bg-white border-borderline text-transparent'
-              }">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              <span class="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${badgeStyle}">
+                <svg class="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="2.5 6.5 5 9 9.5 3.5"></polyline>
                 </svg>
               </span>
             </div>
-            <p class="text-xs sm:text-sm text-ink-muted leading-[1.7]">
-              ${item.desc}
+            <p class="text-xs sm:text-sm text-ink-muted leading-relaxed">
+              ${escapeHtml(opt.desc)}
             </p>
           </div>
         `;
       }).join('');
 
-      container.querySelectorAll('.stuck-card').forEach((card) => {
-        const toggle = () => {
+      // 綁定卡片點擊與鍵盤切換事件
+      grid.querySelectorAll('.stuck-card').forEach((card) => {
+        const toggleSelection = () => {
           const id = card.getAttribute('data-stuck-id');
+          if (!id) return;
+
           const idx = state.selectedStuck.indexOf(id);
-          if (idx > -1) {
-            state.selectedStuck.splice(idx, 1);
-          } else {
+          if (idx === -1) {
             state.selectedStuck.push(id);
+          } else {
+            state.selectedStuck.splice(idx, 1);
           }
           renderStuckCards();
           updateLiveResult();
         };
 
-        card.addEventListener('click', toggle);
+        card.addEventListener('click', toggleSelection);
         card.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            toggle();
+            toggleSelection();
           }
         });
       });
     }
 
-    // 6. 即時更新進度條與「決策整理單」結果區
+    // 6. 即時同步下方「決策整理單」與頂部進度條
     function updateLiveResult() {
-      const now = new Date();
-      document.getElementById('result-today-date').textContent =
-        `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+      const outA = document.getElementById('out-choice-a');
+      const outB = document.getElementById('out-choice-b');
+      const outTime = document.getElementById('out-stuck-time');
+      const outImpact = document.getElementById('out-delay-impact');
+      const outFacts = document.getElementById('out-facts');
+      const outWorries = document.getElementById('out-worries');
 
-      document.getElementById('out-choice-a').textContent = state.choiceA || '尚未填寫';
-      document.getElementById('out-choice-b').textContent = state.choiceB || '尚未填寫';
-      document.getElementById('out-stuck-time').textContent = state.stuckTime || '尚未填寫';
-      document.getElementById('out-delay-impact').textContent = state.delayImpact || '尚未填寫';
+      outA.textContent = state.choiceA || '尚未填寫';
+      outA.className = state.choiceA
+        ? 'text-sm sm:text-base font-semibold text-wood'
+        : 'text-sm sm:text-base font-medium text-ink-muted';
 
-      document.getElementById('out-facts').textContent = state.facts || '尚未填寫';
-      document.getElementById('out-worries').textContent = state.worries || '尚未填寫';
+      outB.textContent = state.choiceB || '尚未填寫';
+      outB.className = state.choiceB
+        ? 'text-sm sm:text-base font-semibold text-water'
+        : 'text-sm sm:text-base font-medium text-ink-muted';
 
+      outTime.textContent = state.stuckTime || '尚未填寫';
+      outImpact.textContent = state.delayImpact || '尚未填寫';
+      outFacts.textContent = state.facts || '尚未填寫';
+      outWorries.textContent = state.worries || '尚未填寫';
+
+      // 同步第三步驟勾選短評與自訂狀態
       const feedbackContainer = document.getElementById('out-stuck-feedback');
       const matchedItems = STUCK_OPTIONS.filter((opt) => state.selectedStuck.includes(opt.id));
+      const hasCustomStuck = Boolean(state.customStuck);
 
-      if (matchedItems.length === 0) {
+      // 有填寫自訂狀態時，外框同步亮起
+      const customBox = document.getElementById('custom-stuck-box');
+      if (hasCustomStuck) {
+        customBox.classList.remove('bg-mist/55', 'border-borderline');
+        customBox.classList.add('bg-wood-tint/80', 'border-wood', 'shadow-soft');
+      } else {
+        customBox.classList.add('bg-mist/55', 'border-borderline');
+        customBox.classList.remove('bg-wood-tint/80', 'border-wood', 'shadow-soft');
+      }
+
+      if (matchedItems.length === 0 && !hasCustomStuck) {
         feedbackContainer.innerHTML = `
           <div class="bg-mist/70 border border-borderline rounded-2xl p-4 text-xs sm:text-sm text-ink-muted">
-            在上方「3. 你現在遲遲沒動，最接近哪一種狀態？」勾選後，這裡會出現對應的提醒。
+            在上方「3. 你現在遲遲沒動，最接近哪一種狀態？」勾選或填寫後，這裡會出現對應的提醒。
           </div>
         `;
       } else {
-        feedbackContainer.innerHTML = matchedItems.map((item) => `
+        const presetHtml = matchedItems.map((item) => `
           <div class="bg-mist/85 border border-borderline rounded-2xl p-4 sm:p-5">
             <span class="inline-block px-2.5 py-0.5 rounded-lg bg-wood-tint text-wood text-xs font-bold mb-2">
-              ${item.title}
+              ${escapeHtml(item.title)}
             </span>
             <p class="text-sm text-ink leading-[1.75]">
-              ${item.comment}
+              ${escapeHtml(item.comment)}
             </p>
           </div>
         `).join('');
+
+        const customHtml = hasCustomStuck ? `
+          <div class="bg-water-tint/60 border border-water/25 rounded-2xl p-4 sm:p-5">
+            <span class="inline-block px-2.5 py-0.5 rounded-lg bg-white text-water text-xs font-bold mb-2 border border-water/20">
+              自己寫下的狀態
+            </span>
+            <p class="text-sm text-ink leading-[1.75] whitespace-pre-line">${escapeHtml(state.customStuck)}</p>
+          </div>
+        ` : '';
+
+        feedbackContainer.innerHTML = presetHtml + customHtml;
       }
 
       document.getElementById('out-small-step').textContent = state.smallStep || '尚未填寫';
 
-      const step1Done = Boolean(state.choiceA || state.choiceB || state.stuckTime || state.delayImpact);
-      const step2Done = Boolean(state.facts || state.worries);
-      const step3Done = state.selectedStuck.length > 0;
-      const step4Done = Boolean(state.smallStep);
+      // 計算四步驟完成進度
+      const stepDoneMap = {
+        1: Boolean(state.choiceA || state.choiceB || state.stuckTime || state.delayImpact),
+        2: Boolean(state.facts || state.worries),
+        3: state.selectedStuck.length > 0 || hasCustomStuck,
+        4: Boolean(state.smallStep)
+      };
 
-      const completedCount = [step1Done, step2Done, step3Done, step4Done].filter(Boolean).length;
-      document.getElementById('progress-fill').style.width = `${completedCount * 25}%`;
+      const completedCount = Object.values(stepDoneMap).filter(Boolean).length;
+      const progressFill = document.getElementById('progress-fill');
+      if (progressFill) {
+        progressFill.style.width = `${(completedCount / 4) * 100}%`;
+      }
 
-      const stepFlags = [step1Done, step2Done, step3Done, step4Done];
-      document.querySelectorAll('.step-nav-item').forEach((navEl, index) => {
-        if (stepFlags[index]) {
-          navEl.classList.remove('text-ink-muted');
-          navEl.classList.add('text-wood', 'bg-wood-tint/60');
+      document.querySelectorAll('.step-nav-item').forEach((navItem) => {
+        const stepNum = Number(navItem.getAttribute('data-step-nav'));
+        if (stepDoneMap[stepNum]) {
+          navItem.classList.remove('text-ink-muted');
+          navItem.classList.add('text-wood', 'font-semibold', 'bg-white/80');
         } else {
-          navEl.classList.add('text-ink-muted');
-          navEl.classList.remove('text-wood', 'bg-wood-tint/60');
+          navItem.classList.add('text-ink-muted');
+          navItem.classList.remove('text-wood', 'font-semibold', 'bg-white/80');
         }
       });
-
-      document.getElementById('copy-status-msg').classList.add('hidden');
     }
 
-    // 7. 切換「換個時間距離看這件事」分頁
-    function switchDistanceTab(key) {
-      state.activeDistance = key;
-      document.querySelectorAll('.distance-tab').forEach((btn) => {
-        const isCurrent = btn.getAttribute('data-distance') === key;
-        btn.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
-        if (isCurrent) {
-          btn.classList.add('bg-water', 'text-white');
-          btn.classList.remove('text-ink-muted', 'hover:text-ink');
-        } else {
-          btn.classList.remove('bg-water', 'text-white');
-          btn.classList.add('text-ink-muted', 'hover:text-ink');
-        }
-      });
-      document.getElementById('out-distance-text').textContent = DISTANCE_VIEWS[key];
-    }
-
-    // 8. 同步輸入框與狀態
+    // 7. 同步輸入框與狀態
     function syncFieldsFromState() {
       document.getElementById('input-choice-a').value = state.choiceA;
       document.getElementById('input-choice-b').value = state.choiceB;
@@ -905,69 +946,87 @@
       document.getElementById('input-delay-impact').value = state.delayImpact;
       document.getElementById('input-facts').value = state.facts;
       document.getElementById('input-worries').value = state.worries;
+      document.getElementById('input-custom-stuck').value = state.customStuck;
       document.getElementById('input-small-step').value = state.smallStep;
       renderStuckCards();
       updateLiveResult();
     }
 
-    // 9. 組合純文字並複製到剪貼簿（採用 execCommand 相容 iframe 環境）
-    function copy整理內容() {
+    // 8. 組合純文字並複製到剪貼簿（採用 execCommand 相容 iframe 環境）
+    function copySummaryNote() {
       const matchedItems = STUCK_OPTIONS.filter((opt) => state.selectedStuck.includes(opt.id));
-      const stuckSummary = matchedItems.length > 0
-        ? matchedItems.map((m) => `・${m.title}\n  ${m.comment}`).join('\n\n')
-        : '・尚未勾選';
+      const stuckLines = matchedItems.map((m) => `・${m.title}\n  ${m.comment}`);
+      if (state.customStuck) {
+        stuckLines.push(`・自己寫下的狀態：${state.customStuck}`);
+      }
+      const stuckSummary = stuckLines.length > 0
+        ? stuckLines.join('\n\n')
+        : '・尚未勾選或填寫';
+
+      const dateLabel = document.getElementById('result-today-date').textContent || '';
 
       const plainText = [
-        '【三木水｜決策整理單】',
-        `猶豫選項：「${state.choiceA || '未填寫'}」和「${state.choiceB || '未填寫'}」`,
-        `在腦袋裡轉了：${state.stuckTime || '未填寫'}`,
-        `拖著的影響：${state.delayImpact || '未填寫'}`,
+        `【三木水｜決策整理單】${dateLabel ? `（${dateLabel}）` : ''}`,
         '',
-        '【確定已經發生的事實】',
-        state.facts || '未填寫',
+        '1. 目前的猶豫選項',
+        `・選項 A：${state.choiceA || '尚未填寫'}`,
+        `・選項 B：${state.choiceB || '尚未填寫'}`,
+        `・在腦袋裡轉了：${state.stuckTime || '尚未填寫'}`,
+        `・拖著的影響：${state.delayImpact || '尚未填寫'}`,
         '',
-        '【還沒發生、腦袋自己先演完的畫面】',
-        state.worries || '未填寫',
+        '2. 事實與擔心的對照',
+        `【確定已經發生的事實】\n${state.facts || '尚未填寫'}`,
+        `【還沒發生、腦袋自己先演完的畫面】\n${state.worries || '尚未填寫'}`,
         '',
-        '【你現在卡住的狀態與提醒】',
+        '3. 你現在卡住的狀態與提醒',
         stuckSummary,
         '',
-        '【明天可以先試探的一件小事】',
-        state.smallStep || '未填寫',
+        '4. 明天可以先試探的一件小事',
+        `・${state.smallStep || '尚未填寫'}`,
         '',
-        '整理自：三木水工作室（@three.tree.water）'
+        '— 整理自 三木水｜決策整理練習（https://lin.ee/sqUy2Lx）'
       ].join('\n');
 
-      const helperArea = document.createElement('textarea');
-      helperArea.value = plainText;
-      helperArea.setAttribute('readonly', '');
-      helperArea.style.position = 'fixed';
-      helperArea.style.left = '-9999px';
-      document.body.appendChild(helperArea);
-      helperArea.select();
-      helperArea.setSelectionRange(0, helperArea.value.length);
-
-      let success = false;
       try {
-        success = document.execCommand('copy');
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = plainText;
+        tempTextarea.setAttribute('readonly', '');
+        tempTextarea.style.position = 'fixed';
+        tempTextarea.style.top = '-9999px';
+        tempTextarea.style.left = '-9999px';
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        tempTextarea.setSelectionRange(0, tempTextarea.value.length);
+        const copied = document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+
+        if (copied) {
+          const copyMsg = document.getElementById('copy-status-msg');
+          if (copyMsg) {
+            copyMsg.classList.remove('hidden');
+          }
+          showToast('已複製整理內容，可直接貼到官方 LINE 傳送');
+        } else {
+          showToast('請手動選取上方整理單文字複製');
+        }
       } catch (err) {
-        success = false;
+        showToast('請手動選取上方整理單文字複製');
       }
-      document.body.removeChild(helperArea);
-
-      if (!success && navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(plainText).catch(() => {});
-      }
-
-      document.getElementById('copy-status-msg').classList.remove('hidden');
-      showToast('已複製，可直接貼到三木水官方 LINE');
     }
 
-    // 10. 初始化所有事件監聽
+    // 9. 初始化頁面與事件監聽
     document.addEventListener('DOMContentLoaded', () => {
-      renderStuckCards();
-      updateLiveResult();
+      // 設定今日日期
+      const todayEl = document.getElementById('result-today-date');
+      if (todayEl) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        todayEl.textContent = `${yyyy}.${mm}.${dd}`;
+      }
 
+      // 綁定所有文字輸入欄位
       const fieldBindings = [
         { id: 'input-choice-a', key: 'choiceA' },
         { id: 'input-choice-b', key: 'choiceB' },
@@ -975,45 +1034,84 @@
         { id: 'input-delay-impact', key: 'delayImpact' },
         { id: 'input-facts', key: 'facts' },
         { id: 'input-worries', key: 'worries' },
+        { id: 'input-custom-stuck', key: 'customStuck' },
         { id: 'input-small-step', key: 'smallStep' }
       ];
 
       fieldBindings.forEach(({ id, key }) => {
-        document.getElementById(id).addEventListener('input', (e) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
           state[key] = e.target.value.trim();
           updateLiveResult();
         });
       });
 
+      // 綁定第四步驟「靈感標籤快捷按鈕」
       document.querySelectorAll('.idea-chip').forEach((chip) => {
         chip.addEventListener('click', () => {
-          const idea = chip.getAttribute('data-idea');
-          const box = document.getElementById('input-small-step');
-          const current = box.value.trim();
-          if (!current) {
-            box.value = idea;
-          } else if (!current.includes(idea)) {
-            box.value = `${current}；${idea}`;
+          const idea = chip.getAttribute('data-idea') || '';
+          const stepInput = document.getElementById('input-small-step');
+          if (!stepInput || !idea) return;
+
+          const currentVal = stepInput.value.trim();
+          if (!currentVal) {
+            stepInput.value = idea;
+          } else if (!currentVal.includes(idea)) {
+            stepInput.value = `${currentVal}\n${idea}`;
           }
-          state.smallStep = box.value.trim();
+
+          state.smallStep = stepInput.value.trim();
           updateLiveResult();
-          box.focus();
+          showToast('已帶入小試探靈感');
         });
       });
 
+      // 綁定整理單「換個時間距離看這件事」切換頁籤
       document.querySelectorAll('.distance-tab').forEach((tab) => {
         tab.addEventListener('click', () => {
-          switchDistanceTab(tab.getAttribute('data-distance'));
+          const distKey = tab.getAttribute('data-distance');
+          if (!distKey || !DISTANCE_VIEWS[distKey]) return;
+
+          state.activeDistance = distKey;
+          document.querySelectorAll('.distance-tab').forEach((btn) => {
+            const isCurrent = btn.getAttribute('data-distance') === distKey;
+            btn.setAttribute('aria-selected', String(isCurrent));
+            if (isCurrent) {
+              btn.classList.add('bg-water', 'text-white');
+              btn.classList.remove('text-ink-muted', 'hover:text-ink');
+            } else {
+              btn.classList.remove('bg-water', 'text-white');
+              btn.classList.add('text-ink-muted', 'hover:text-ink');
+            }
+          });
+
+          const distTextEl = document.getElementById('out-distance-text');
+          if (distTextEl) {
+            distTextEl.textContent = DISTANCE_VIEWS[distKey];
+          }
         });
       });
 
-      document.getElementById('generate-note-btn').addEventListener('click', () => {
-        updateLiveResult();
-        document.getElementById('result-sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      // 綁定「查看我的決策整理單」平滑捲動按鈕
+      const generateBtn = document.getElementById('generate-note-btn');
+      if (generateBtn) {
+        generateBtn.addEventListener('click', () => {
+          const sheet = document.getElementById('result-sheet');
+          if (sheet) {
+            sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          showToast('已整理好你的決策單');
+        });
+      }
 
-      document.getElementById('copy-note-btn').addEventListener('click', copy整理內容);
+      // 綁定「複製整理內容」按鈕
+      const copyBtn = document.getElementById('copy-note-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', copySummaryNote);
+      }
 
+      // 綁定「清空重填」按鈕
       document.querySelectorAll('.clear-all-trigger').forEach((btn) => {
         btn.addEventListener('click', () => {
           state.choiceA = '';
@@ -1023,11 +1121,22 @@
           state.facts = '';
           state.worries = '';
           state.selectedStuck = [];
+          state.customStuck = '';
           state.smallStep = '';
+
+          const copyMsg = document.getElementById('copy-status-msg');
+          if (copyMsg) {
+            copyMsg.classList.add('hidden');
+          }
+
           syncFieldsFromState();
           showToast('已清空內容，可以重新開始寫');
         });
       });
+
+      // 初次載入渲染
+      renderStuckCards();
+      updateLiveResult();
     });
   </script>
 </body>
