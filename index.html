@@ -395,6 +395,19 @@
       <div id="stuck-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <!-- 由 JS 渲染並同步狀態 -->
       </div>
+
+            <!-- 自訂空白填寫格 -->
+      <div id="custom-stuck-box" class="mt-3.5 rounded-2xl p-4 sm:p-5 border border-borderline bg-mist/55 transition-all">
+        <label for="input-custom-stuck" class="block font-serif text-base font-bold text-ink mb-1.5">
+          其他卡住的狀態（自己填寫）
+        </label>
+        <textarea
+          id="input-custom-stuck"
+          rows="2"
+          placeholder="如果上面沒有完全說中，可以直接寫下你現在卡住的地方..."
+          class="w-full bg-white border border-borderline focus:border-wood focus:ring-2 focus:ring-wood/15 focus:outline-none rounded-xl px-3.5 py-2.5 text-sm sm:text-base text-ink leading-[1.7] placeholder:text-ink-muted/50 resize-y transition-all"
+        ></textarea>
+      </div>
     </section>
 
     <!-- ========================================== -->
